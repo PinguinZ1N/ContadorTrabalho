@@ -1,0 +1,186 @@
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Tempo</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin-top: 30px;
+    }
+
+    #opcoes, #timerArea {
+        display: none;
+        margin-top: 20px;
+    }
+
+    button {
+        padding: 10px 20px;
+        margin: 5px;
+        cursor: pointer;
+    }
+
+    #timer {
+        font-size: 2rem;
+        color: red;
+        font-weight: bold;
+    }
+
+    #lista {
+        margin-top: 30px;
+        width: 300px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: left;
+    }
+
+    .item {
+        font-size: 12px; /* nomes menores */
+        border-bottom: 1px solid #ddd;
+        padding: 5px 0;
+    }
+</style>
+</head>
+<body>
+
+<h1>Cadastro</h1>
+
+<input type="text" id="nome" placeholder="Digite seu nome">
+<button onclick="continuar()">Continuar</button>
+
+<div id="opcoes">
+    <h2 id="mensagem"></h2>
+
+    <p>Qual o tipo?</p>
+
+    <button onclick="escolherTipo(1)">Opção 1</button>
+    <button onclick="escolherTipo(2)">Opção 2</button>
+</div>
+
+<div id="timerArea">
+    <h2>Tempo restante:</h2>
+    <div id="timer">10:00</div>
+</div>
+
+<div id="lista">
+    <h3>Lista de registros</h3>
+    <div id="registros"></div>
+</div>
+<div id="saldoArea">
+    <h3>Saldo Total: R$ <span id="saldo">0,00</span></h3>
+</div>
+<script>
+let nomeAtual = "";
+let saldo = 0;
+function continuar() {
+    nomeAtual = document.getElementById("nome").value.trim();
+
+    if (!nomeAtual) {
+        alert("Digite um nome.");
+        return;
+    }
+
+    document.getElementById("mensagem").textContent =
+        `Olá, ${nomeAtual}!`;
+
+    document.getElementById("opcoes").style.display = "block";
+}
+
+function escolherTipo(tipo) {
+    if (tipo === 1) {
+        saldo += 20;
+
+        adicionarRegistro(
+            nomeAtual,
+            "Opção 1",
+            "+R$20,00"
+        );
+
+        atualizarSaldo();
+
+    } else {
+        saldo += 5;
+
+        const timerId = adicionarRegistro(
+            nomeAtual,
+            "Opção 2",
+            "+R$5,00"
+        );
+
+        atualizarSaldo();
+
+        iniciarTimerIndividual(timerId, 600);
+    }
+}
+function iniciarTimerIndividual(elementId, segundos) {
+
+    const elemento = document.getElementById(elementId);
+
+    const intervalo = setInterval(() => {
+
+        const minutos = Math.floor(segundos / 60);
+        const segs = segundos % 60;
+
+        elemento.textContent =
+            ` | Tempo: ${String(minutos).padStart(2, "0")}:${String(segs).padStart(2, "0")}`;
+
+        segundos--;
+
+        if (segundos < 0) {
+            clearInterval(intervalo);
+            elemento.textContent = " | Finalizado";
+        }
+
+    }, 1000);
+}
+function adicionarRegistro(nome, tipo, valor) {
+    const agora = new Date();
+    const horario = agora.toLocaleTimeString("pt-BR");
+
+    const item = document.createElement("div");
+    item.className = "item";
+
+    const timerId = "timer_" + Date.now();
+
+    item.innerHTML = `
+        ${nome} | ${tipo} | ${valor} | ${horario}
+        <span id="${timerId}"></span>
+    `;
+
+    document.getElementById("registros").prepend(item);
+
+    return timerId;
+}
+
+function iniciarTimer(segundos) {
+    document.getElementById("timerArea").style.display = "block";
+
+    const timer = document.getElementById("timer");
+
+    clearInterval(window.contador);
+
+    window.contador = setInterval(() => {
+        const minutos = Math.floor(segundos / 60);
+        const segs = segundos % 60;
+
+        timer.textContent =
+            `${String(minutos).padStart(2, "0")}:${String(segs).padStart(2, "0")}`;
+
+        segundos--;
+
+        if (segundos < 0) {
+            clearInterval(window.contador);
+            timer.textContent = "Tempo encerrado!";
+        }
+    }, 1000);
+}
+function atualizarSaldo() {
+    document.getElementById("saldo").textContent =
+        saldo.toFixed(2).replace(".", ",");
+}
+</script>
+
+</body>
+</html>
